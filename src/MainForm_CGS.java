@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Calendar;
 
 
 public class MainForm_CGS extends JFrame{
@@ -63,17 +64,21 @@ public class MainForm_CGS extends JFrame{
                         double commission = Double.parseDouble(commissionText);
 
                         // Create Gallery instance and add curator
+                        if (!fname.isEmpty() && !lname.isEmpty() && lname.length() <= 30){
+                            String curatorAdd = gal.addCurator(userID, fname, lname, commission);
 
-                        String curatorAdd = gal.addCurator(userID, fname, lname, commission);
-
-                        // Display the message to the user
-                        JOptionPane.showMessageDialog(null, curatorAdd);
-                        if (curatorAdd.startsWith("Success")) {
-                            // Clear text fields if curator added successfully
-                            textFieldCuratorID.setText("");
-                            textFieldFirstName.setText("");
-                            textFieldLastName.setText("");
-                            textFieldCommission.setText("");
+                            // Display the message to the user
+                            JOptionPane.showMessageDialog(null, curatorAdd);
+                            if (curatorAdd.startsWith("Success")) {
+                                // Clear text fields if curator added successfully
+                                textFieldCuratorID.setText("");
+                                textFieldFirstName.setText("");
+                                textFieldLastName.setText("");
+                                textFieldCommission.setText("");
+                            }
+                        }else{
+                            JOptionPane.showMessageDialog(null, "Error! Firstname and Lastname cannot be empty or " +
+                                    "should have less than 30 characters");
                         }
                     } catch (NumberFormatException ex) {
                         // Handle case where commission text cannot be parsed to double
@@ -94,29 +99,32 @@ public class MainForm_CGS extends JFrame{
 
                 // Retrieve text from text fields
                 String artistID = textFieldArtistID.getText();
-                if (gal.ArtistIdVerifier(artistID) != true) {
+                if (gal.ArtistIdVerifier(artistID) == true) {
                     // error message
-                    JOptionPane.showMessageDialog(buttonAddArtist, "Error! Artist ID.");
-
-
+                    JOptionPane.showMessageDialog(buttonAddArtist, "Error! This Artist ID already exist.");
                 } else {
                     String userID = textFieldCuratorIDA.getText();
                     if (gal.CuratorIdVerifier(userID) != true) {
                         // error message
-                        JOptionPane.showMessageDialog(buttonAddArtist, "Error! Curator ID.");
+                        JOptionPane.showMessageDialog(buttonAddArtist, "Error! No Curator with this ID Number.");
                     } else {
                         String fname = textFieldFirstNameArtist.getText();
                         String lname = textFieldLastNameArtist.getText();
 
-                        String artistAdd = gal.addArtist(artistID, userID, fname, lname);
+                        if (!fname.isEmpty() && !lname.isEmpty() && lname.length() <= 30){
+                            String artistAdd = gal.addArtist(artistID, userID, fname, lname);
 
-                        JOptionPane.showMessageDialog(null, artistAdd);
-                        if (artistAdd.startsWith("Success")) {
-                            // Clear text fields if curator added successfully
-                            textFieldArtistID.setText("");
-                            textFieldCuratorIDA.setText("");
-                            textFieldFirstNameArtist.setText("");
-                            textFieldLastNameArtist.setText("");
+                            JOptionPane.showMessageDialog(null, artistAdd);
+                            if (artistAdd.startsWith("Success")) {
+                                // Clear text fields if curator added successfully
+                                textFieldArtistID.setText("");
+                                textFieldCuratorIDA.setText("");
+                                textFieldFirstNameArtist.setText("");
+                                textFieldLastNameArtist.setText("");
+                            }
+                        } else{
+                            JOptionPane.showMessageDialog(null, "Error! Firstname and Lastname cannot be empty or " +
+                                    "should have less than 30 characters");
                         }
                     }
                 }
@@ -130,45 +138,56 @@ public class MainForm_CGS extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 String msg = "";
                 // Retrieve text from text fields
-                String peiceID = textFieldArtPieceID.getText();
-                if (gal.peiceVerifier(peiceID) != true) {
+                String pieceID = textFieldArtPieceID.getText();
+                if (gal.peiceVerifier(pieceID) == true) {
                     // error message
+                    JOptionPane.showMessageDialog(buttonAddArtist, "Error! This ArtPiece ID already exist.");
                 } else {
                     String artistID = textFieldArtistIdAP.getText();
                     if (gal.ArtistIdVerifier(artistID) != true) {
                         // error message
-                        msg = "Error! This Curator is does not exist! Please check.";
+                        JOptionPane.showMessageDialog(buttonAddArtist,"Error! This Artist ID does not exist! Please check.");
                     } else {
                         String curatorID = textFieldCuratorIDAP.getText();
                         if (gal.CuratorIdVerifier(curatorID) != true) {
                             // error message
-                            msg = "Error! This Curator is does not exist! Please check.";
+                            JOptionPane.showMessageDialog(buttonAddArtist,"Error! This Curator ID does not exist! Please check.");
                         } else {
                             String title = textFieldTitle.getText();
                             String yearText = textFieldYear.getText();
                             String estimateText = textFieldEstimate.getText();
 
-                            if (!yearText.isEmpty() && !estimateText.isEmpty()) {
+                            //Check fields
+                            if (!yearText.isEmpty() && !estimateText.isEmpty() && !title.isEmpty()) {
                                 try {
                                     // Parse year text to int
                                     int year = Integer.parseInt(yearText);
 
-                                    // Parse estimate text to double
-                                    double estimate = Double.parseDouble(estimateText);
+                                    // Get the current year
+                                    int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
-                                    // Create Gallery instance and add art piece
-                                    String artPieceAdd = gal.addPiece(peiceID, title, year, estimate, artistID, curatorID);
+                                    // Ensure the year is not more than the current year
+                                    if (year <= currentYear) {
 
-                                    // Display the message to the user
-                                    JOptionPane.showMessageDialog(null, artPieceAdd);
-                                    if (artPieceAdd.startsWith("Success")) {
-                                        // Clear text fields if art piece added successfully
-                                        textFieldArtPieceID.setText("");
-                                        textFieldArtistIdAP.setText("");
-                                        textFieldCuratorIDAP.setText("");
-                                        textFieldTitle.setText("");
-                                        textFieldYear.setText("");
-                                        textFieldEstimate.setText("");
+                                        // Parse estimate text to double
+                                        double estimate = Double.parseDouble(estimateText);
+
+                                        // Create Gallery instance and add art piece
+                                        String artPieceAdd = gal.addPiece(pieceID, title, year, estimate, artistID, curatorID);
+
+                                        // Display the message to the user
+                                        JOptionPane.showMessageDialog(null, artPieceAdd);
+                                        if (artPieceAdd.startsWith("Success")) {
+                                            // Clear text fields if art piece added successfully
+                                            textFieldArtPieceID.setText("");
+                                            textFieldArtistIdAP.setText("");
+                                            textFieldCuratorIDAP.setText("");
+                                            textFieldTitle.setText("");
+                                            textFieldYear.setText("");
+                                            textFieldEstimate.setText("");
+                                        }
+                                    }else {
+                                        JOptionPane.showMessageDialog(null, "Error! Year cannot be greater than the current year.");
                                     }
                                 } catch (NumberFormatException ex) {
                                     // Handle case where year text or estimate text cannot be parsed
@@ -176,7 +195,7 @@ public class MainForm_CGS extends JFrame{
                                 }
                             } else {
                                 // Handle case where year text field or estimate text field is empty
-                                JOptionPane.showMessageDialog(null, "Error! Year and estimate cannot be empty.");
+                                JOptionPane.showMessageDialog(null, "Error! Title, Year and Estimate cannot be empty.");
                             }
                         }
                     }
@@ -204,6 +223,7 @@ public class MainForm_CGS extends JFrame{
                 textFieldLastName.setText("");
                 textFieldFirstName.setText("");
                 textFieldCuratorID.setText("");
+                textFieldCommission.setText("");
             }
         });
         buttonClearA.addActionListener(new ActionListener() {
